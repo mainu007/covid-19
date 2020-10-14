@@ -1,51 +1,79 @@
 import React, { Component } from "react";
-import { Cards, Chart, CountryPicker, Table } from "./components";
-import { fetchData } from "./api";
+import { Container, Grid } from "@material-ui/core";
+import CovidLogo from "./images/image.png";
+import { fetchData, fetchCountries } from "./api";
+import { Cards, CountryPicker, Chart } from "./components";
 import styles from "./App.module.css";
-import image from "./images/image.png";
+import Progress from "./components/Progress";
+import Tables from "./components/Tables";
 
-export default class App extends Component {
-  state = {
-    data: {},
-    country: "",
-    loading: true,
-    chartShow: true,
-  };
+class App extends Component {
+   state = {
+      data: {},
+      countriesData: [],
+      loading: true,
+      country: "",
+   };
 
-  async componentDidMount() {
-    try {
-      const data = await fetchData();
-      this.setState({ data, loading: false });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+   initData = (country) => {
+      fetchData(country).then((data) => {
+         if (data.error) {
+            console.log(data.error);
+         } else {
+            this.setState({ data });
+         }
+      });
+   };
 
-  handleCountryChange = async (country) => {
-    const data = await fetchData(country);
-    this.setState({ data, country });
-  };
+   fetchCountriesData = () => {
+      fetchCountries().then((data) => {
+         if (data.error) {
+            console.log(data.error);
+         } else {
+            this.setState({ countriesData: data, loading: false });
+         }
+      });
+   };
 
-  handleChartChange = () => {
-    this.state.chartShow
-      ? this.setState({ chartShow: false })
-      : this.setState({ chartShow: true });
-  };
+   componentDidMount() {
+      this.initData();
+      this.fetchCountriesData();
+   }
 
-  render() {
-    const { data, loading, country, chartShow } = this.state;
-    return (
-      <div className={styles.container}>
-        <img className={styles.image} src={image} alt="COVID-19" />
-        <Cards data={data} loading={loading} />
-        <CountryPicker
-          handleChartChange={this.handleChartChange}
-          handleChange={this.handleCountryChange}
-          chartShow={chartShow}
-          loading={loading}
-        />
-        {chartShow ? <Chart data={data} country={country} /> : <Table />}
-      </div>
-    );
-  }
+   countryPickerHandler = (country) => {
+      this.initData(country);
+      this.setState({ country });
+   };
+
+   render() {
+      const { loading, country, countriesData } = this.state;
+      return (
+         <Container maxWidth="xl">
+            <div className={styles.logoContainer}>
+               <img src={CovidLogo} className={styles.logoImage} alt="..." />
+            </div>
+            {loading ? (
+               <Progress />
+            ) : (
+               <>
+                  <Grid container spacing={3}>
+                     <Grid item md={8} sm={6} xs={12}>
+                        <Cards data={this.state.data} />
+                        <CountryPicker
+                           data={countriesData}
+                           onHandler={this.countryPickerHandler}
+                        />
+                        <Chart country={country} />
+                     </Grid>
+                     <Grid item md={4} sm={6} xs={12}>
+                        <Tables data={countriesData} />
+                     </Grid>
+                  </Grid>
+               </>
+            )}
+         </Container>
+      );
+   }
 }
+
+export default App;
