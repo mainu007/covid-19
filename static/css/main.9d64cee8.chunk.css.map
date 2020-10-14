@@ -1,0 +1,1 @@
+{"version":3,"sources":["App.module.css"],"names":[],"mappings":"AAAA,0BACI,aAAc,CACd,iBACJ,CACA,sBACI,cACJ","file":"main.9d64cee8.chunk.css","sourcesContent":[".logoContainer{\n    margin: 32px 0;\n    text-align: center;\n}\n.logoImage{\n    max-width: 100%;\n}"]}
